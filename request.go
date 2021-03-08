@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -146,6 +147,7 @@ func unmarshalNode(data *Node, model reflect.Value, included *map[string]*Node) 
 		}
 	}()
 
+	fmt.Fprint(os.Stdout, "entering unmarshalNode\n")
 	modelValue := model.Elem()
 	modelType := modelValue.Type()
 
@@ -153,8 +155,10 @@ func unmarshalNode(data *Node, model reflect.Value, included *map[string]*Node) 
 
 	for i := 0; i < modelValue.NumField(); i++ {
 		fieldType := modelType.Field(i)
+		fmt.Fprint(os.Stdout, "%03d: %+v\n", i, fieldType)
 		tag := fieldType.Tag.Get("jsonapi")
 		if tag == "" {
+		fmt.Fprint(os.Stdout, "continuing\n")
 			continue
 		}
 
@@ -174,8 +178,10 @@ func unmarshalNode(data *Node, model reflect.Value, included *map[string]*Node) 
 			break
 		}
 
+		fmt.Fprint(os.Stdout, "annotation: %s\n", annotation)
 		if annotation == annotationPrimary {
 			if data.ID == "" {
+		fmt.Fprint(os.Stdout, "data id continuing\n")
 				continue
 			}
 
@@ -186,6 +192,7 @@ func unmarshalNode(data *Node, model reflect.Value, included *map[string]*Node) 
 					data.Type,
 					args[1],
 				)
+		fmt.Fprint(os.Stdout, "breaking\n")
 				break
 			}
 
@@ -228,6 +235,7 @@ func unmarshalNode(data *Node, model reflect.Value, included *map[string]*Node) 
 			assign(fieldValue, idValue)
 		} else if annotation == annotationClientID {
 			if data.ClientID == "" {
+		fmt.Fprint(os.Stdout, "client id continuing\n")
 				continue
 			}
 
@@ -236,6 +244,7 @@ func unmarshalNode(data *Node, model reflect.Value, included *map[string]*Node) 
 			attributes := data.Attributes
 
 			if attributes == nil || len(data.Attributes) == 0 {
+		fmt.Fprint(os.Stdout, "attributes continuing\n")
 				continue
 			}
 
@@ -258,6 +267,7 @@ func unmarshalNode(data *Node, model reflect.Value, included *map[string]*Node) 
 			isSlice := fieldValue.Type().Kind() == reflect.Slice
 
 			if data.Relationships == nil || data.Relationships[args[1]] == nil {
+		fmt.Fprint(os.Stdout, "relationships continuing\n")
 				continue
 			}
 
